@@ -1,15 +1,24 @@
-FROM node:12
+FROM node:12-alpine
 MAINTAINER Jason Tranchida <jtranchida@gmail.com>
 
-# Update NPM to the latest available version
-RUN npm i npm@latest -g
+ARG VERSION=latest
 
-# Pull all of the dependencies
-#ADD package.json package.json
-#RUN npm install --production
+RUN apk --no-cache add udev
 
-#ADD . .
-RUN npm install -g cncjs@latest --unsafe
+RUN apk add --no-cache --virtual build-deps \
+        gcc g++ make musl-dev python3 linux-headers \
+    && npm install -g cncjs@$VERSION --unsafe \
+    && apk del build-deps
+
+VOLUME /cncjs
+
+ENV CNCJS_CONTROLLER=
+ENV CNCJS_ADDITIONAL_ARGUMENTS=
 
 EXPOSE 8000
-CMD ["bin/cncjs"]
+CMD ["/usr/local/bin/cncjs", \
+    "--port", "8000", \
+    "--config", "/cncjs/.cncrc", \
+    "--watch-directory", "/cncjs/watch/", \
+    "--controller", \
+    "\"${CNCJS_CONTROLLER}\"" ]

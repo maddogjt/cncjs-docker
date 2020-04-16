@@ -1,0 +1,29 @@
+version: '3'
+services:
+  cncjs:
+    image: maddogjt/cncjs-docker
+    build:
+      context: .
+      args:
+        - VERSION=1.9.22
+    environment:
+      - CNCJS_CONTROLLER
+      - CNCJS_ADDITIONAL_ARGUMENTS
+    volumes:
+      - ${CNCJS_VOLUME}:/cncjs
+#    devices:
+#      - ${PRINTER_DEVICE}:/dev/printer
+    restart: always
+    networks:
+      cncjs:
+    expose:
+      - "8000"
+    ports:
+      - "${CNCJS_HTTP_PORT}:8000"
+
+# Custom network so all services can communicate using a FQDN
+networks:
+    cncjs:
+
+volumes:
+    cncjs:
